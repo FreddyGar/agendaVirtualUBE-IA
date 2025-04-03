@@ -35,19 +35,29 @@
 </div>
 
 <div class="tabla-reporte">
-  <table id="tablaEventos" class="table table-striped">
-    <thead>
-      <tr>
-        <th>Título</th>
-        <th>Fecha Inicio</th>
-        <th>Hora Inicio</th>
-        <th>Fecha Fin</th>
-        <th>Hora Fin</th>
-        <th>Descripción</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Aquí se generan las filas de eventos dinámicamente -->
-    </tbody>
-  </table>
+  <!-- Encabezado fijo -->
+  <div class="tabla-encabezado">
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Fecha Inicio</th>
+          <th>Hora Inicio</th>
+          <th>Fecha Fin</th>
+          <th>Hora Fin</th>
+          <th>Descripción</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+  <!-- Cuerpo con scroll -->
+  <div class="tabla-cuerpo-scrollable">
+    <table id="tablaEventos" class="table table-striped table-hover">
+      <tbody>
+        <!-- Aquí se generan las filas de eventos dinámicamente -->
+      </tbody>
+    </table>
+  </div>
 </div>
+

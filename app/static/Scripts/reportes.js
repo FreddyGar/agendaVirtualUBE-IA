@@ -12,67 +12,52 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-function cargarEventos() {
+async function cargarEventos() {
     console.log("🔄 Ejecutando cargarEventos...");
-
-    const eventosJSON = localStorage.getItem('eventosCalendar');
-
-    let eventos;
-
-    if (!eventosJSON) {
-        console.warn('No se encontraron eventos en el localStorage. Cargando eventos de ejemplo...');
-        eventos = obtenerEventosDeEjemplo();
-
-        // Opcional: guardar los eventos de ejemplo en el localStorage
-        localStorage.setItem('eventosCalendar', JSON.stringify(eventos));
-    } else {
-        eventos = JSON.parse(eventosJSON);
-        console.log('Eventos cargados desde localStorage:', eventos);
+  
+    try {
+      const eventos = await obtenerEventosDesdeAPI();
+  
+      if (!Array.isArray(eventos) || eventos.length === 0) {
+        console.warn('⚠️ No hay eventos disponibles desde la API');
+        mostrarMensajeSinEventos();
+        return;
+      }
+  
+      eventos.sort((a, b) => new Date(a.start) - new Date(b.start));
+      actualizarTablaEventos(eventos);
+  
+    } catch (error) {
+      console.error('❌ Error al obtener eventos desde la API:', error);
+      mostrarErrorCargaEventos(error);
     }
+  }
+  
 
-    eventos.sort((a, b) => new Date(a.start) - new Date(b.start));
-
+  function mostrarMensajeSinEventos() {
     const tablaBody = document.querySelector('#tablaEventos tbody');
-
-    if (!tablaBody) {
-        console.error('No se encontró el tbody de la tabla');
-        return;
-    }
-
-    tablaBody.innerHTML = '';
-
-    if (eventos.length === 0) {
-        const fila = document.createElement('tr');
-        fila.innerHTML = `<td colspan="6" class="text-center">No hay eventos registrados.</td>`;
-        tablaBody.appendChild(fila);
-        return;
-    }
-
-    eventos.forEach((evento, index) => {
-        console.log(`Agregando fila ${index + 1}:`, evento);
-
-        const fila = document.createElement('tr');
-
-        const fechaInicio = evento.start ? formatoFecha(evento.start) : 'Sin fecha';
-        const horaInicio = evento.start ? formatoHora(evento.start) : 'Sin hora';
-        const fechaFin = evento.end ? formatoFecha(evento.end) : 'Sin fecha';
-        const horaFin = evento.end ? formatoHora(evento.end) : 'Sin hora';
-        const descripcion = evento.description || 'Sin descripción';
-
-        fila.innerHTML = `
-            <td>${evento.title || 'Sin título'}</td>
-            <td>${fechaInicio}</td>
-            <td>${horaInicio}</td>
-            <td>${fechaFin}</td>
-            <td>${horaFin}</td>
-            <td>${descripcion}</td>
-        `;
-
-        tablaBody.appendChild(fila);
-    });
-        actualizarTablaEventos(eventos);
-
-}
+    if (!tablaBody) return;
+  
+    tablaBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center text-muted">No hay eventos registrados.</td>
+      </tr>
+    `;
+  }
+  
+  function mostrarErrorCargaEventos(error) {
+    const tablaBody = document.querySelector('#tablaEventos tbody');
+    if (!tablaBody) return;
+  
+    tablaBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center text-danger">
+          Error al cargar eventos: ${error.message}
+        </td>
+      </tr>
+    `;
+  }
+  
 
 function formatoFecha(fechaISO) {
     const fecha = new Date(fechaISO);
