@@ -1,0 +1,53 @@
+<!-- reportes.html -->
+
+<h2>Reportes de Eventos</h2>
+
+<div class="filtros-container">
+  <button id="exportCSV" class="btn btn-primary">Exportar a CSV</button>
+  <button id="exportPDF" class="btn btn-danger">Exportar a PDF</button>
+
+  <input
+    type="text"
+    id="filtroEventos"
+    class="form-control"
+    placeholder="Buscar por título o descripción"
+  />
+
+  <div class="filtro-fechas">
+    <label for="fechaInicioFiltro">Desde:</label>
+    <input
+      type="date"
+      id="fechaInicioFiltro"
+      class="form-control"
+      placeholder="dd/mm/aaaa"
+    />
+
+    <label for="fechaFinFiltro">Hasta:</label>
+    <input
+      type="date"
+      id="fechaFinFiltro"
+      class="form-control"
+      placeholder="dd/mm/aaaa"
+    />
+  </div>
+
+  <button id="limpiarFiltros" class="btn btn-secondary">Limpiar Filtros</button>
+</div>
+
+<div class="tabla-reporte">
+  <table id="tablaEventos" class="table table-striped">
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Fecha Inicio</th>
+        <th>Hora Inicio</th>
+        <th>Fecha Fin</th>
+        <th>Hora Fin</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Aquí se generan las filas de eventos dinámicamente -->
+    </tbody>
+  </table>
+</div>

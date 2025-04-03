@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Datos de Usuario</title>
+
+  <!-- CSS externo -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='Styles/styles.css') }}">
+
+  <!-- Font Awesome para iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+  <h1 class="parametros-title"><i class="fa-solid fa-user-gear"></i> Mis Datos de Usuario</h1>
+  <p class="parametros-description">Consulta o modifica tus datos.</p>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="parametros-contenedor-principal">
+
+    <!-- Primer bloque: Foto + Datos -->
+    <div class="parametros-container fila-superior">
+
+      <!-- Foto de Perfil -->
+      <div class="foto-perfil-section">
+        <img id="fotoPerfil" src="{{ url_for('static', filename='img/user.jpg') }}" alt="Foto de Perfil">
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+
+      <!-- Datos Personales -->
+      <form id="usuarioForm" class="info-form-section">
+        <div class="form-group">
+          <label for="nombre">Nombre:</label>
+          <input type="text" id="nombre" name="nombre" required>
+        </div>
+
+        <div class="form-group">
+          <label for="apellido">Apellido:</label>
+          <input type="text" id="apellido" name="apellido" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Correo Electrónico:</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="text" id="telefono" name="telefono">
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado:</label>
+          <select id="estado" name="estado" class="form-select">
+            <option value="">Seleccione estado</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ultimaSesion">Última Sesión:</label>
+          <input type="text" id="ultimaSesion" name="ultimaSesion" readonly>
+        </div>
+
+        <button type="submit" class="btn-actualizar">
+          <i class="fa-solid fa-floppy-disk"></i> Actualizar Datos
+        </button>
+      </form>
+
+    </div>
+
+    <!-- Segundo bloque: Horarios y Cambio de Contraseña -->
+    <div class="fila-inferior">
+
+      <!-- Tercer bloque: Horarios -->
+      <div class="parametros-container bloque-horarios">
+
+        <h2 class="parametros-title"><i class="fa-solid fa-clock"></i> Mis Horarios</h2>
+        <p class="parametros-description">Gestiona tus horarios laborales y tus horas no disponibles.</p>
+
+        <!-- Horarios Laborales -->
+        <div class="info-form-section horario-laboral">
+          <h3><i class="fa-solid fa-briefcase"></i> Horario Laboral</h3>
+          <div class="form-group">
+            <label for="horarioLaboral">Horario:</label>
+            <input type="text" id="horarioLaboral" name="horarioLaboral" readonly>
+          </div>
+        </div>
+
+        <!-- Horarios No Disponibles -->
+        <div class="info-form-section horarios-no-disponibles">
+          <h3><i class="fa-solid fa-ban"></i> Horarios No Disponibles</h3>
+        <!-- Inputs para agregar nuevos horarios -->
+        <div class="form-group-inline">
+          <label for="nuevoDesde">Desde:</label>
+          <input type="time" id="nuevoDesde">
+        </div>
+
+        <div class="form-group-inline">
+          <label for="nuevoHasta">Hasta:</label>
+          <input type="time" id="nuevoHasta">
+        </div>
+
+          <!-- Botón para agregar horarios -->
+          <button type="button" onclick="agregarHorario()" class="btn-agregar">
+            <i class="fa-solid fa-plus"></i> Agregar Horario
+          </button>
+
+          <!-- Lista de horarios no disponibles -->
+          <ul id="listaHorarios" class="lista-horarios"></ul>
+        </div>
+
+      </div>
+
+      <!-- Segundo bloque: Cambio de Contraseña -->
+      <div class="parametros-container bloque-contrasena">
+        <h2 class="parametros-title"><i class="fa-solid fa-key"></i> Cambiar Contraseña</h2>
+
+        <form id="cambioContrasenaForm" class="info-form-section">
+
+          <div class="form-group">
+            <label for="contrasenaActual">Contraseña Actual:</label>
+            <input type="password" id="contrasenaActual" name="contrasenaActual" required>
+          </div>
+
+          <div class="form-group">
+            <label for="nuevaContrasena">Nueva Contraseña:</label>
+            <input type="password" id="nuevaContrasena" name="nuevaContrasena" required minlength="8">
+          </div>
+
+          <div class="form-group">
+            <label for="confirmarContrasena">Confirmar Nueva Contraseña:</label>
+            <input type="password" id="confirmarContrasena" name="confirmarContrasena" required minlength="8">
+          </div>
+
+          <button type="submit" class="btn-actualizar">
+            <i class="fa-solid fa-key"></i> Actualizar Contraseña
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="{{ url_for('static', filename='Scripts/parametros.js') }}"></script>
+
+</body>
+</html>

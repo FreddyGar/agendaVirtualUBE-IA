@@ -1,0 +1,169 @@
+<!-- inicio.html -->
+
+<h2>Bienvenido al Sistema de Agendamiento Académico</h2>
+
+<!-- Botón: Analizar agenda -->
+<button type="button" class="btn" 
+        style="background-color: #fd7e14; border-color: #fd7e14; color: #fff;" 
+        data-bs-toggle="modal" data-bs-target="#analizaModal">
+  <i class="bi bi-search"></i> Analiza agenda
+</button>
+
+<!-- Botón: Sugerir Horario IA -->
+<button id="btnSugerirIA" class="btn btn-info">
+  <i class="bi bi-robot"></i> Sugerir Horario (IA)
+</button>
+
+<!-- Modal: Análisis de la Agenda -->
+<div class="modal fade" id="analizaModal" tabindex="-1" aria-labelledby="analizaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- Encabezado del modal -->
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="analizaModalLabel">Análisis de la Agenda</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <!-- Cuerpo del modal -->
+      <div class="modal-body">
+        <div id="analisisResultado">
+          <!-- Aquí se mostrará el resultado del análisis de agenda -->
+        </div>
+      </div>
+
+      <!-- Footer del modal -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Sugerencia de Horario IA -->
+<div class="modal fade" id="sugerenciaIAModal" tabindex="-1" aria-labelledby="sugerenciaIAModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- Encabezado del modal -->
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="sugerenciaIAModalLabel">Sugerencia de Horario (IA)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <!-- Cuerpo del modal -->
+      <div class="modal-body">
+        <div id="sugerenciaIAResultado">
+          <!-- Aquí se mostrará la recomendación generada dinámicamente desde JS -->
+          <p><strong>Recomendación:</strong> Se sugiere mover el evento <em>'Revisión IA'</em> al <strong>21/03/2025 10:00 a.m.</strong></p>
+        </div>
+      </div>
+
+      <!-- Footer del modal -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" id="aplicarSugerenciaIA">
+          <i class="bi bi-check-circle-fill me-1"></i> Aplicar Sugerencia
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Calendario -->
+<div id="calendar"></div>
+
+<!-- Modal: Crear / Editar Evento -->
+<div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Encabezado del modal -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="eventoModalLabel">Nuevo Evento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <!-- Cuerpo del modal -->
+      <div class="modal-body">
+        <form id="formEvento">
+
+          <!-- Campo: Título -->
+          <div class="mb-3">
+            <label for="tituloEvento" class="form-label">Título del Evento</label>
+            <input type="text" class="form-control" id="tituloEvento" required>
+          </div>
+
+          <!-- Fila: Estado + Modalidad -->
+          <div class="row">
+            <!-- Campo: Estado -->
+            <div class="form-group col-md-6">
+              <label for="estadoEvento">Estado:</label>
+              <select id="estadoEvento" class="form-control">
+                <option value="Pendiente" selected>Pendiente</option>
+                <option value="Confirmada">Confirmada</option>
+                <option value="Anulada">Anulada</option>
+              </select>
+            </div>
+
+            <!-- Campo: Modalidad -->
+            <div class="form-group col-md-6">
+              <label for="modalidadEvento">Modalidad:</label>
+              <select id="modalidadEvento" class="form-control">
+                <option value="1">Presencial</option>
+                <option value="2">Virtual</option>
+                <option value="3">Telefónica</option>
+                <option value="4">Híbrida</option>
+                <option value="5">Correo Electrónico</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Campo: Fecha -->
+          <div class="mb-3 mt-3">
+            <label for="fechaEvento" class="form-label">Fecha</label>
+            <input type="date" class="form-control" id="fechaEvento" required>
+          </div>
+
+          <!-- Campo: Hora de Inicio -->
+          <div class="mb-3">
+            <label for="horaInicioEvento" class="form-label">Hora de Inicio</label>
+            <input type="time" class="form-control" id="horaInicioEvento">
+          </div>
+
+          <!-- Campo: Hora de Fin -->
+          <div class="mb-3">
+            <label for="horaFinEvento" class="form-label">Hora de Fin</label>
+            <input type="time" class="form-control" id="horaFinEvento">
+          </div>
+
+          <!-- Campo: Descripción -->
+          <div class="mb-3">
+            <label for="descripcionEvento" class="form-label">Descripción</label>
+            <textarea class="form-control" id="descripcionEvento" rows="2"></textarea>
+          </div>
+
+          <!-- Campo: Email -->
+          <div class="input-group mb-3">
+            <input type="email" class="form-control" id="emailEvento" required placeholder="Correo del solicitante">
+            <button class="btn btn-outline-primary" type="button" id="enviarCorreo">
+              <i class="bi bi-envelope-fill"></i> Enviar
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+
+      <!-- Footer del modal -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" id="eliminarEvento">Eliminar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="guardarEvento">Guardar Evento</button>
+      </div>
+
+    </div>
+  </div>
+</div>

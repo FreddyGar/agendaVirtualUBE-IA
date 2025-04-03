@@ -1,0 +1,59 @@
+<h2>Buzón de Solicitudes de Agendamiento</h2>
+
+<!-- Contenedor de las solicitudes -->
+<div id="buzonSolicitudes" class="d-flex flex-column gap-3">
+
+  <!-- Solicitud 1 -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      Solicitud #1
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">Reunión con el Vicerrector</h5>
+      <p class="card-text">
+        <strong>Solicitante:</strong> Juan Pérez<br>
+        <strong>Fecha solicitada:</strong> 2025-03-30<br>
+        <strong>Hora:</strong> 10:00 - 11:00<br>
+        <strong>Motivo:</strong> Presentación de proyecto académico
+      </p>
+      <div class="d-flex gap-2">
+        <button class="btn btn-success btn-sm" onclick="aceptarSolicitud(1)">Aceptar</button>
+        <button class="btn btn-danger btn-sm" onclick="rechazarSolicitud(1)">Rechazar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Solicitud 2 -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      Solicitud #2
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">Asesoría de tesis</h5>
+      <p class="card-text">
+        <strong>Solicitante:</strong> María López<br>
+        <strong>Fecha solicitada:</strong> 2025-04-01<br>
+        <strong>Hora:</strong> 14:00 - 15:00<br>
+        <strong>Motivo:</strong> Revisión de avances de tesis
+      </p>
+      <div class="d-flex gap-2">
+        <button class="btn btn-success btn-sm" onclick="aceptarSolicitud(2)">Aceptar</button>
+        <button class="btn btn-danger btn-sm" onclick="rechazarSolicitud(2)">Rechazar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Aquí va el script JS que manejará las acciones -->
+<script>
+  function aceptarSolicitud(id) {
+    alert(`Solicitud #${id} aceptada ✅`);
+    // Aquí puedes agregar lógica para enviar la aceptación al backend si quieres
+  }
+
+  function rechazarSolicitud(id) {
+    alert(`Solicitud #${id} rechazada ❌`);
+    // Aquí puedes agregar lógica para enviar el rechazo al backend si quieres
+  }
+</script>
