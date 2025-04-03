@@ -3,8 +3,8 @@
 <h2>Reportes de Eventos</h2>
 
 <div class="filtros-container">
-  <button id="exportCSV" class="btn btn-primary">Exportar a CSV</button>
-  <button id="exportPDF" class="btn btn-danger">Exportar a PDF</button>
+  <!-- <button id="exportCSV" class="btn btn-primary">Exportar a CSV</button>
+  <button id="exportPDF" class="btn btn-danger">Exportar a PDF</button> -->
 
   <input
     type="text"
@@ -19,7 +19,6 @@
       type="date"
       id="fechaInicioFiltro"
       class="form-control"
-      placeholder="dd/mm/aaaa"
     />
 
     <label for="fechaFinFiltro">Hasta:</label>
@@ -27,8 +26,9 @@
       type="date"
       id="fechaFinFiltro"
       class="form-control"
-      placeholder="dd/mm/aaaa"
     />
+    
+<button id="btnBuscar" class="btn btn-success">Buscar</button>
   </div>
 
   <button id="limpiarFiltros" class="btn btn-secondary">Limpiar Filtros</button>
@@ -60,4 +60,3 @@
     </table>
   </div>
 </div>
-

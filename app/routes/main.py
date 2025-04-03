@@ -14,6 +14,20 @@ def login_view():
 def inicio_view():
     return render_template('index.html')
 
+@main.route('/buzon')
+def buzon_view():
+    return render_template('index.html')
+
+@main.route('/reportes')
+def reportes_view():
+    return render_template('index.html')
+
+@main.route('/parametros')
+def parametros_view():
+    return render_template('index.html')
+
+
+
 @main.route('/fragment/<modulo>')
 def fragmento(modulo):
     allowed = ['inicio', 'buzon', 'reportes', 'parametros']
