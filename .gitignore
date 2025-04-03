@@ -1,0 +1,12 @@
+# Ignorar directorios __pycache__
+__pycache__/
+app/__pycache__/
+app/routes/__pycache__/
+
+output/
+logs/
+venv/
+
+# Ignorar archivos de caché y bytecode de Python
+*.py[cod]
+*.pyc[cod]
