@@ -1,55 +1,107 @@
 // Scripts/index.js
+let callback = null;
 
-// Cuando se carga index.html, validamos sesión y cargamos la vista de inicio por defecto
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('usuario')) {
     window.location.href = '/login';
     return;
   }
 
-  // Carga por defecto el inicio mediante el endpoint /fragment/inicio
-  const inicioLink = document.querySelector('.nav-link[data-modulo="inicio"]');
-  setActiveMenuItem(inicioLink);
+  // Determinar el módulo según la URL
+  const path = window.location.pathname;
 
-  cargarModulo('/fragment/inicio', '/static/Scripts/inicio.js', () => {
+  let modulo = 'inicio';
+  let urlHtml = '/fragment/inicio';
+  let urlScript = '/static/Scripts/inicio.js';
+  let callback = () => {
     if (typeof initCalendar === 'function') {
       initCalendar();
       actualizarEventosEnCalendario();
     }
-  });
+    if (typeof initInicioUI === 'function') {
+      initInicioUI(); // <- Esto inicializa los botones y modales
+    }
+  };
+
+  switch (path) {
+    case '/inicio':
+      modulo = 'inicio';
+      urlHtml = '/fragment/inicio';
+      urlScript = '/static/Scripts/inicio.js';
+      callback = () => {
+        // Esperar un poquito a que el DOM y script estén listos
+        setTimeout(() => {
+          if (typeof initCalendar === 'function') {
+            initCalendar();
+            actualizarEventosEnCalendario();
+          }
+          if (typeof initInicioUI === 'function') {
+            initInicioUI();
+          } else {
+            console.warn('⚠️ initInicioUI no está definido');
+          }
+        }, 200); // pequeño delay para asegurar que todo se haya insertado
+      };
+      break;
+    case '/buzon':
+      modulo = 'buzon';
+      urlHtml = '/fragment/buzon';
+      urlScript = '/static/Scripts/buzon.js';
+      callback = null;
+      break;
+    case '/reportes':
+      modulo = 'reportes';
+      urlHtml = '/fragment/reportes';
+      urlScript = '/static/Scripts/reportes.js';
+      callback = () => {
+        if (typeof cargarEventos === 'function') cargarEventos();
+      };
+      break;
+    case '/parametros':
+      modulo = 'parametros';
+      urlHtml = '/fragment/parametros';
+      urlScript = '/static/Scripts/parametros.js';
+      callback = null;
+      break;
+  }
+
+  const link = document.querySelector(`.nav-link[data-modulo="${modulo}"]`);
+  if (link) setActiveMenuItem(link);
+  cargarModulo(urlHtml, urlScript, callback, path);
 });
 
 // ============================
 // Cargar módulo dinámicamente
 // ============================
-async function cargarModulo(urlHtml, urlScript, callbackFinal) {
+async function cargarModulo(urlHtml, urlScript, callbackFinal, nuevaRuta = null) {
   const contenedor = document.getElementById('contenido');
   if (!contenedor) return;
 
   try {
-    // 1. Cargar el fragmento HTML
     const resp = await fetch(urlHtml);
     if (!resp.ok) throw new Error('No se pudo cargar ' + urlHtml);
     const html = await resp.text();
     contenedor.innerHTML = html;
 
-    // 2. Si hay script, lo inyectamos dinámicamente
     if (urlScript) {
-      // Elimina scripts previos marcados como data-dynamic (opcional, para limpiar)
       document.querySelectorAll('script[data-dynamic="true"]').forEach(s => s.remove());
 
       const s = document.createElement('script');
       s.src = urlScript;
       s.dataset.dynamic = 'true';
       s.onload = () => {
-        console.log('✅ Script cargado:', urlScript);
         if (typeof callbackFinal === 'function') callbackFinal();
       };
       document.body.appendChild(s);
     } else {
-      // Si no hay script, sólo llamamos callback
       if (typeof callbackFinal === 'function') callbackFinal();
     }
+
+    // 👉 Cambiar la URL sin recargar
+    if (nuevaRuta) {
+      history.pushState({ modulo: nuevaRuta }, '', nuevaRuta);
+    }
+
   } catch (err) {
     console.error(err);
     contenedor.innerHTML = `<p>Error al cargar el módulo: ${err.message}</p>`;
@@ -68,10 +120,7 @@ function logout() {
 // Control de menú activo
 // ============================
 function setActiveMenuItem(clickedLink) {
-  // Quitar 'active' de todos los enlaces
   const links = document.querySelectorAll('.sidebar .nav-link');
   links.forEach(link => link.classList.remove('active'));
-
-  // Agregar 'active' solo al clicado
   clickedLink.classList.add('active');
 }
