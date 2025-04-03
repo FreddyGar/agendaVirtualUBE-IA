@@ -64,8 +64,20 @@ function initCalendar() {
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth,refresh',
     },
+    customButtons: {
+      refresh: {
+        text: '🔄',
+        click: function () {
+          if (calendar) {
+            calendar.refetchEvents();
+            alert("🔄 Eventos actualizados");
+          }
+        }
+      }
+    },
+    
     dayMaxEventRows: 3, // 👈 Esto activa el popover agrupa de 3
     nowIndicator: true, // 👈 Línea roja de hora actual del tiempo 
     businessHours: [        // Horarios laborales personalizados
@@ -246,6 +258,17 @@ async function guardarEventoEnModal() {
   const inicio = `${fecha} ${horaInicio}:00`;
   const fin = `${fecha} ${horaFin}:00`;
 
+  // 🔒 Validación contra fecha/hora actual
+  const ahora = new Date();
+  const fechaHoraInicio = new Date(inicio);
+
+  if (fechaHoraInicio < ahora) {
+    alert("⛔ No puedes crear eventos en el pasado.");
+    if (btnGuardar) btnGuardar.disabled = false;
+    return;
+  }
+
+
   const eventoData = {
     cedula_solicitante: "0102030405",
     email_solicitante: email,
@@ -277,7 +300,7 @@ async function guardarEventoEnModal() {
 
     alert("✅ Evento guardado correctamente");
     cerrarModal();
-    actualizarEventosEnCalendario();
+    calendar.refetchEvents();
 
     // 👇 Nueva lógica para preguntar si deseas enviar notificación
     const deseaNotificar = confirm("¿Deseas enviar una notificación por correo al solicitante?");
@@ -336,6 +359,13 @@ async function eliminarEventoEnModal() {
     return;
   }
 
+  // 🔐 Verificar si el estado del evento es Pendiente
+  const estado = eventoSeleccionado.extendedProps.estado;
+  if (estado !== "Pendiente") {
+    alert("❌ Solo se pueden eliminar eventos con estado 'Pendiente'.");
+    return;
+  }
+
   const confirmacion = confirm("¿Estás seguro de que deseas eliminar este evento?");
   if (!confirmacion) return;
 
@@ -351,12 +381,13 @@ async function eliminarEventoEnModal() {
 
     alert("✅ Evento eliminado correctamente");
     cerrarModal();
-    actualizarEventosEnCalendario();
+    calendar.refetchEvents();
   } catch (error) {
     console.error("❌ Error al eliminar evento:", error);
     alert("Ocurrió un error al intentar eliminar el evento.");
   }
 }
+
 
 
 function cerrarModal() {
@@ -369,8 +400,10 @@ function cerrarModal() {
 function actualizarEventosEnCalendario() {
   if (!calendar) return;
   obtenerEventosDesdeAPI().then(eventos => {
-    calendar.getEvents().forEach(event => event.remove());
-    eventos.forEach(evento => calendar.addEvent(evento));
+    calendar.refetchEvents(); // ✅ recarga desde el backend sin duplicar
+
+    // calendar.getEvents().forEach(event => event.remove());
+    // eventos.forEach(evento => calendar.addEvent(evento));
   });
 }
 
@@ -778,7 +811,7 @@ async function moverEventoRecomendado(tituloEvento, nuevoInicioISO, nuevoFinISO)
 
   await actualizarEventoEnBackend(evento, nuevoInicio, nuevoFin); // 👈 aquí se guarda en la BD
 
-  actualizarEventosEnCalendario();
+  calendar.refetchEvents();
 
   alert(`✅ Evento "${tituloEvento}" movido exitosamente a ${formatDateTime(nuevoInicioISO)} - ${formatDateTime(nuevoFinISO)}.`);
 

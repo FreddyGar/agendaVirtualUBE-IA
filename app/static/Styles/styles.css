@@ -935,3 +935,34 @@ textarea, input {
     width: 100%;
   }
 }
+
+.tabla-reporte {
+  width: 100%;
+}
+
+.tabla-encabezado table,
+.tabla-cuerpo-scrollable table {
+  table-layout: fixed;
+  width: 100%;
+  margin: 0;
+}
+
+.tabla-encabezado {
+  overflow: hidden;
+}
+
+.tabla-cuerpo-scrollable {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+}
+
+.tabla-encabezado th,
+.tabla-cuerpo-scrollable td {
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+
+.tabla-cuerpo-scrollable tr:hover {
+  background-color: #f1f1f1;
+}
