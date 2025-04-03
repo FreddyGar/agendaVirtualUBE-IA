@@ -4,6 +4,7 @@ let moduloActual = null; // ⬅️ Esto controla el módulo actualmente cargado
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  
   if (!localStorage.getItem('usuario')) {
     window.location.href = '/login';
     return;

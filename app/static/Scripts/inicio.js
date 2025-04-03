@@ -307,19 +307,25 @@
       const deseaNotificar = confirm("¿Deseas enviar una notificación por correo al solicitante?");
       if (deseaNotificar) {
         const subject = `🗓️ Recordatorio: Cita agendada para ${titulo} el ${fecha} a las ${horaInicio}`;
+
         const body = `
-          Estimado@ participante,
+        Estimado(a) participante,
 
-          Se confirma que tienes una cita agendada como "${titulo}" el día ${fecha} desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}.
+        Le informamos que tiene una cita agendada con los siguientes detalles:
 
-          📝 Modalidad: ${modalidadTexto}
+        - 📝 Evento: ${titulo}
+        - 📅 Fecha: ${fecha}
+        - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
+        - 🧭 Modalidad: ${modalidadTexto}
 
-          Por favor, guarda esta información y preséntate puntualmente. Si tienes dudas o necesitas reprogramar, contáctanos con anticipación.
+        Por favor, guarde esta información y preséntese puntualmente.  
+        Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
 
-          Saludos,
-          Virectorado Académico  
-          UNIVERSIDAD BOLIVARIANA DEL ECUADOR UBE
+        Saludos cordiales,  
+        Vicerrectorado Académico  
+        UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
         `.trim();
+
 
         const payload = {
           to: email,
@@ -459,6 +465,9 @@
         const horaInicio = document.getElementById('horaInicioEvento').value;
         const horaFin = document.getElementById('horaFinEvento').value;
         const email = document.getElementById('emailEvento').value.trim();
+        const modalidad = document.getElementById('modalidadEvento').value; // ✅ ID de modalidad
+        const modalidadTexto = document.getElementById('modalidadEvento')
+        .options[document.getElementById('modalidadEvento').selectedIndex].text; // ✅ Texto visible
 
         if (!email || !nombre || !fecha || !horaInicio) {
           return alert("Completa todos los campos para enviar el correo.");
@@ -466,15 +475,21 @@
 
         const subject = `🗓️ Recordatorio: Cita agendada para ${nombre} el ${fecha} a las ${horaInicio}`;
         const body = `
-          Estimado@ participante,
+          Estimado(a) participante,
 
-          Se confirma que tienes una cita ${nombre} agendada el día ${fecha} desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}.
+        Le informamos que tiene una cita agendada con los siguientes detalles:
 
-          Por favor, guarda esta información y preséntate puntualmente. Si tienes dudas o necesitas reprogramar, contáctanos con anticipación.
+        - 📝 Evento: ${nombre}
+        - 📅 Fecha: ${fecha}
+        - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
+        - 🧭 Modalidad: ${modalidadTexto}
 
-          Saludos,
-          Virectorado Academico 
-          UNIVERSIDAD BOLIVARIANA DEL ECUADOR UBE
+        Por favor, guarde esta información y preséntese puntualmente.  
+        Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
+
+        Saludos cordiales,  
+        Vicerrectorado Académico  
+        UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
         `.trim();
 
         const payload = {
@@ -877,6 +892,9 @@
     const horaInicio = startDate.toTimeString().slice(0, 5);
     const horaFin = endDate ? endDate.toTimeString().slice(0, 5) : '';
     const btnEnviarCorreo = document.getElementById('enviarCorreo');
+    const modalidad = document.getElementById('modalidadEvento').value; // ✅ ID de modalidad
+    const modalidadTexto = document.getElementById('modalidadEvento')
+      .options[document.getElementById('modalidadEvento').selectedIndex].text; // ✅ Texto visible
 
     document.getElementById('eventoModalLabel').textContent = 'Editar Evento';
     document.getElementById('tituloEvento').value = evento.extendedProps.nombre || evento.title;
@@ -909,15 +927,21 @@
 
         const subject = `🗓️ Recordatorio: Cita agendada para ${nombre} el ${fecha} a las ${horaInicio}`;
         const body = `
-          Hola ${nombre},
+          Estimado(a) participante,
 
-          Te confirmamos que tienes una cita agendada el día ${fecha} desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}.
+        Le informamos que tiene una cita agendada con los siguientes detalles:
 
-          Por favor, guarda esta información y preséntate puntualmente. Si tienes dudas o necesitas reprogramar, contáctanos con anticipación.
+        - 📝 Evento: ${nombre}
+        - 📅 Fecha: ${fecha}
+        - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
+        - 🧭 Modalidad: ${modalidadTexto}
 
-          Saludos,
-          Unidad de Bienestar Estudiantil
-          Instituto Superior Tecnológico UBE
+        Por favor, guarde esta información y preséntese puntualmente.  
+        Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
+
+        Saludos cordiales,  
+        Vicerrectorado Académico  
+        UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
         `.trim();
 
         const payload = {

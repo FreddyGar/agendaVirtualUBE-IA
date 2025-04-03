@@ -9,8 +9,8 @@ ZONA_UTC_MINUS_5 = timezone(timedelta(hours=-5))
 HORARIO_LABORAL_INICIO = time(7, 0)
 HORARIO_LABORAL_FIN = time(18, 0)
 
-# Umbral de ocupación (%) para saltar de día si está saturado
-UMBRAL_OCUPACION = 70
+# Umbral de ocupación (%) para considerar saturado el día
+UMBRAL_OCUPACION = 90  # ← Aumentado del 70% al 90%
 
 # Ruta al modelo entrenado
 modelo_path = 'app/models/modelo_sugerencias.pkl'
@@ -29,7 +29,6 @@ modelo = joblib.load(modelo_path)
 def obtener_mejor_horario(eventos, dia_consulta=None):
     eventos_dt = []
     for e in eventos:
-        # Asegurar zona horaria UTC-5
         start_dt = asegura_zona(datetime.fromisoformat(e['start']))
         end_dt = asegura_zona(datetime.fromisoformat(e['end'])) if e.get('end') else (start_dt + timedelta(hours=1))
 
@@ -62,10 +61,8 @@ def obtener_mejor_horario(eventos, dia_consulta=None):
         'mensaje': '🚫 No se encontró espacio recomendado por IA en los próximos días'
     }
 
-# Lista de horas que quieres bloquear siempre (ejemplo: 12 a 13 almuerzo)
 BLOQUES_NO_DISPONIBLES = [
     (time(12, 0), time(13, 0)),  # 12:00 a 13:00
-    # Agrega más si necesitas
 ]
 
 def buscar_horario(eventos, dia_consulta, duracion_horas=1):
@@ -89,29 +86,30 @@ def buscar_horario(eventos, dia_consulta, duracion_horas=1):
     print(f"📊 Ocupación del día {dia_consulta}: {ocupacion:.1f}%")
 
     if ocupacion >= UMBRAL_OCUPACION:
-        print(f"🚫 Día {dia_consulta} demasiado ocupado ({ocupacion:.1f}%)")
-        return sin_espacio(dia_consulta)
+        print(f"⚠️ Día {dia_consulta} está bastante ocupado ({ocupacion:.1f}%), pero se revisarán huecos disponibles...")
 
     print(f"🔎 Buscando huecos disponibles en el día {dia_consulta}...")
 
     posible_inicio = inicio_jornada
 
-    for bloque_inicio, bloque_fin in bloques_ocupados:
+    while posible_inicio + timedelta(hours=duracion_horas) <= fin_jornada:
         posible_fin = posible_inicio + timedelta(hours=duracion_horas)
 
-        if posible_fin <= bloque_inicio:
+        # Verifica si este rango se sobrepone con algún bloque ocupado
+        hay_conflicto = False
+        for bloque_inicio, bloque_fin in bloques_ocupados:
+            if not (posible_fin <= bloque_inicio or posible_inicio >= bloque_fin):
+                hay_conflicto = True
+                break
+
+        if not hay_conflicto:
             print(f"✅ Hueco detectado de {posible_inicio.time()} a {posible_fin.time()}. Validando con IA...")
             resultado = validar_con_modelo(dia_consulta, posible_inicio, duracion_horas, fin_jornada)
             if resultado['nuevo_inicio']:
                 return resultado
 
-        if posible_inicio < bloque_fin:
-            posible_inicio = bloque_fin
-
-    posible_fin = posible_inicio + timedelta(hours=duracion_horas)
-    if posible_fin <= fin_jornada:
-        print(f"✅ Último hueco del día de {posible_inicio.time()} a {posible_fin.time()}. Validando con IA...")
-        return validar_con_modelo(dia_consulta, posible_inicio, duracion_horas, fin_jornada)
+        # Avanzar 15 minutos para probar el siguiente hueco
+        posible_inicio += timedelta(minutes=15)
 
     print(f"❌ Sin huecos válidos el {dia_consulta}")
     return sin_espacio(dia_consulta)

@@ -966,3 +966,139 @@ textarea, input {
 .tabla-cuerpo-scrollable tr:hover {
   background-color: #f1f1f1;
 }
+
+/* ==================== */
+/* ESTILOS RESPONSIVOS EXTRA PARA CELULAR */
+/* ==================== */
+@media screen and (max-width: 576px) {
+  .login-card {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 20px;
+  }
+
+  .filtros-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filtro-fechas {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  #filtroEventos,
+  #fechaInicioFiltro,
+  #fechaFinFiltro,
+  #limpiarFiltros {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .fc-toolbar-title {
+    font-size: 1.4rem;
+  }
+
+  #calendar {
+    padding: 10px;
+    width: 95%;
+  }
+
+  .parametros-contenedor-principal {
+    padding: 10px;
+  }
+
+  .parametros-title {
+    font-size: 1.5rem;
+  }
+
+  .tabla-cuerpo-scrollable {
+    max-height: 300px;
+    font-size: 0.85rem;
+  }
+
+  .tabla-reporte th,
+  .tabla-reporte td {
+    padding: 8px 10px;
+  }
+
+  .toggle-sidebar-btn {
+    display: block !important;
+    top: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+}
+@media screen and (max-width: 576px) {
+  /* Botones principales apilados y centrados */
+  .main-content h2 + .btn,
+  .main-content h2 + .btn + .btn {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .main-content h2 + .btn-group {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Calendario responsive */
+  #calendar {
+    padding: 10px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .fc-toolbar-chunk {
+    flex-wrap: wrap;
+    justify-content: center !important;
+    gap: 8px;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .fc .fc-button-group {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .fc .fc-button {
+    padding: 5px 10px !important;
+    font-size: 0.85rem !important;
+  }
+
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fc .fc-toolbar > div {
+    justify-content: center !important;
+  }
+
+  /* Ocultar scrollbar horizontal (opcional) */
+  body {
+    overflow-x: hidden;
+  }
+}
+
+
+
