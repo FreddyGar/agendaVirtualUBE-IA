@@ -209,10 +209,10 @@
       estado: evento.extendedProps.estado || "Pendiente",
       fecha_hora_inicio: ajustarUTC5(evento.start),
       fecha_hora_fin: evento.end ? ajustarUTC5(evento.end) : null,
-      id_modalidad: 1,
+      id_modalidad: evento.extendedProps.id_modalidad || 1,
       id_responsable: 2,
       id_solicitante: 1,
-      id_tipo_cita: 1,
+      id_tipo_cita: evento.extendedProps.id_tipo_cita || 1,
       nombre_solicitante: evento.extendedProps.nombre || evento.title,
       notas: evento.extendedProps.description || ""
     };
@@ -249,6 +249,11 @@
     const modalidad = document.getElementById('modalidadEvento').value; // ✅ ID de modalidad
     const modalidadTexto = document.getElementById('modalidadEvento')
       .options[document.getElementById('modalidadEvento').selectedIndex].text; // ✅ Texto visible
+    
+    const tipoCita = document.getElementById('tipoCita').value;
+    const tipoCitaTexto = document.getElementById('tipoCita')
+        .options[document.getElementById('tipoCita').selectedIndex].text;
+      
 
     if (!titulo || !fecha || !horaInicio || !horaFin || !email) {
       alert('Completa todos los campos');
@@ -279,7 +284,7 @@
       id_modalidad: parseInt(modalidad), // ✅ ID de modalidad
       id_responsable: 2,
       id_solicitante: 1,
-      id_tipo_cita: 1,
+      id_tipo_cita: parseInt(tipoCita), // ✅ ID de tipo de cita
       nombre_solicitante: titulo,
       notas: descripcion
     };
@@ -317,6 +322,8 @@
         - 📅 Fecha: ${fecha}
         - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
         - 🧭 Modalidad: ${modalidadTexto}
+        - 🧩 Tipo de cita: ${tipoCitaTexto}
+
 
         Por favor, guarde esta información y preséntese puntualmente.  
         Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
@@ -420,43 +427,43 @@
     document.getElementById('eventoModalLabel').textContent = 'Nuevo Evento';
     document.getElementById('estadoEvento').value = 'Pendiente';
     document.getElementById('eliminarEvento').classList.add('d-none');
-
+  
     // 👇 Extraemos fecha y horas si se incluyen
     const fechaObj = new Date(fechaInicio);
     const fecha = fechaObj.toISOString().split('T')[0];
     const horaInicio = fechaInicio.includes('T') ? fechaObj.toTimeString().slice(0, 5) : '';
-
+  
     let horaFin = '';
     if (fechaFin) {
       const finObj = new Date(fechaFin);
       horaFin = finObj.toTimeString().slice(0, 5);
     }
-
+  
     // 👇 Llenamos los campos del formulario
     document.getElementById('fechaEvento').value = fecha;
     document.getElementById('horaInicioEvento').value = horaInicio;
     document.getElementById('horaFinEvento').value = horaFin;
-
+  
     const modalElement = document.getElementById('eventoModal');
     let modal = bootstrap.Modal.getInstance(modalElement);
     if (!modal) {
       modal = new bootstrap.Modal(modalElement);
     }
-
+  
     // ✅ Limpia la selección del calendario al cerrar el modal (X o cancelar)
     const limpiarAlCerrar = () => {
       if (calendar) calendar.unselect();
       modalElement.removeEventListener('hidden.bs.modal', limpiarAlCerrar);
     };
     modalElement.addEventListener('hidden.bs.modal', limpiarAlCerrar);
-
+  
     modal.show();
-
+  
     // ✅ Limpia también la selección justo al mostrar (por si se usó select en week/day)
     if (calendar) {
       calendar.unselect();
     }
-
+  
     const btnEnviarCorreo = document.getElementById('enviarCorreo');
     if (btnEnviarCorreo) {
       btnEnviarCorreo.onclick = async () => {
@@ -465,46 +472,53 @@
         const horaInicio = document.getElementById('horaInicioEvento').value;
         const horaFin = document.getElementById('horaFinEvento').value;
         const email = document.getElementById('emailEvento').value.trim();
-        const modalidad = document.getElementById('modalidadEvento').value; // ✅ ID de modalidad
+  
+        const modalidad = document.getElementById('modalidadEvento').value;
         const modalidadTexto = document.getElementById('modalidadEvento')
-        .options[document.getElementById('modalidadEvento').selectedIndex].text; // ✅ Texto visible
-
+          .options[document.getElementById('modalidadEvento').selectedIndex].text;
+  
+        const tipoCita = document.getElementById('tipoCita').value;
+        const tipoCitaTexto = document.getElementById('tipoCita')
+          .options[document.getElementById('tipoCita').selectedIndex].text;
+  
         if (!email || !nombre || !fecha || !horaInicio) {
           return alert("Completa todos los campos para enviar el correo.");
         }
-
+  
         const subject = `🗓️ Recordatorio: Cita agendada para ${nombre} el ${fecha} a las ${horaInicio}`;
         const body = `
           Estimado(a) participante,
-
-        Le informamos que tiene una cita agendada con los siguientes detalles:
-
-        - 📝 Evento: ${nombre}
-        - 📅 Fecha: ${fecha}
-        - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
-        - 🧭 Modalidad: ${modalidadTexto}
-
-        Por favor, guarde esta información y preséntese puntualmente.  
-        Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
-
-        Saludos cordiales,  
-        Vicerrectorado Académico  
-        UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
+  
+          Le informamos que tiene una cita agendada con los siguientes detalles:
+  
+          - 📝 Evento: ${nombre}
+          - 📅 Fecha: ${fecha}
+          - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
+          - 🧭 Modalidad: ${modalidadTexto}
+          - 🧩 Tipo de cita: ${tipoCitaTexto}
+  
+          Por favor, guarde esta información y preséntese puntualmente.  
+          Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
+  
+          Saludos cordiales,  
+          Vicerrectorado Académico  
+          UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
+          ..
         `.trim();
-
+  
         const payload = {
           to: email,
           subject,
           body
         };
-
+  
         try {
           const response = await fetch("http://127.0.0.1:8000/api/email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
           });
-
+  
           if (!response.ok) throw new Error("Error al enviar el correo");
           alert("✅ Correo enviado correctamente.");
         } catch (error) {
@@ -514,6 +528,7 @@
       };
     }
   }
+  
 
 
 
@@ -834,6 +849,8 @@
     const modal = bootstrap.Modal.getInstance(document.getElementById('analizaModal'));
     if (modal) modal.hide();
   }
+  window.moverEventoRecomendado = moverEventoRecomendado;
+
 
 
   async function actualizarEventoEnBackend(evento, nuevoInicio, nuevoFin) {
@@ -895,6 +912,10 @@
     const modalidad = document.getElementById('modalidadEvento').value; // ✅ ID de modalidad
     const modalidadTexto = document.getElementById('modalidadEvento')
       .options[document.getElementById('modalidadEvento').selectedIndex].text; // ✅ Texto visible
+    
+    const tipoCitaTexto = document.getElementById('tipoCita')
+      .options[document.getElementById('tipoCita').selectedIndex].text;
+    
 
     document.getElementById('eventoModalLabel').textContent = 'Editar Evento';
     document.getElementById('tituloEvento').value = evento.extendedProps.nombre || evento.title;
@@ -907,6 +928,9 @@
 
     // ✅ Agregado: establecer la modalidad en el select
     document.getElementById('modalidadEvento').value = evento.extendedProps.id_modalidad || '1';
+    // ✅ Agregado: establecer la tipo de cita en el select
+    document.getElementById('tipoCita').value = evento.extendedProps.id_tipo_cita || '1';
+
 
     document.getElementById('eliminarEvento').classList.remove('d-none');
 
@@ -935,6 +959,8 @@
         - 📅 Fecha: ${fecha}
         - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
         - 🧭 Modalidad: ${modalidadTexto}
+        - 🧩 Tipo de cita: ${tipoCitaTexto}
+
 
         Por favor, guarde esta información y preséntese puntualmente.  
         Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.

@@ -11,10 +11,9 @@ dia_semana,hora_inicio,duracion,estado
 4,9,1.0,aceptado
 3,9,1.5,aceptado
 3,11,1.0,aceptado
+4,15,1.0,pendiente
+5,7,2.0,aceptado
+4,7,0.7,aceptado
+4,13,2.0,pendiente
 4,10,1.0,pendiente
 4,11,1.0,pendiente
-4,13,5.0,pendiente
-5,7,2.0,aceptado
-5,10,2.0,aceptado
-5,9,1.0,pendiente
-4,7,0.7,aceptado
