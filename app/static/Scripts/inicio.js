@@ -7,7 +7,6 @@
 
   async function obtenerEventosDesdeAPI() {
     try {
-      console.log("🔄 Obteniendo eventos desde la API...");
       const response = await fetch("http://127.0.0.1:8000/api/citas", {
         method: "GET",
         credentials: "include"
@@ -47,7 +46,6 @@
       
       
 
-      console.log("🟢 Eventos formateados para FullCalendar:", eventos);
       return eventos;
     } catch (error) {
       console.error("❌ Error al obtener eventos desde la API:", error);
@@ -104,7 +102,6 @@
       events: async function (fetchInfo, successCallback, failureCallback) {
         try {
           const eventos = await obtenerEventosDesdeAPI();
-          console.log("✅ successCallback ejecutado con", eventos.length, "eventos");
           successCallback(eventos);
         } catch (error) {
           console.error("❌ Error al cargar eventos:", error);
@@ -133,12 +130,10 @@
         abrirModalEditar(info.event);
       },
       eventDrop: function (info) {
-        console.log("📦 Evento movido:", info.event);
         actualizarEventoDesdeDragResize(info.event);
       },
       
       eventResize: function (info) {
-        console.log("📏 Evento redimensionado:", info.event);
         actualizarEventoDesdeDragResize(info.event);
       },
 
@@ -191,6 +186,52 @@
     }
   }
 
+  async function enviarCorreoConfirmacion({ nombre, fecha, horaInicio, horaFin, email, modalidadTexto, tipoCitaTexto }) {
+    if (!email || !nombre || !fecha || !horaInicio) {
+      alert("Completa todos los campos para enviar el correo.");
+      return;
+    }
+  
+    const subject = `🗓️ Recordatorio: Cita agendada para ${nombre} el ${fecha} a las ${horaInicio}`;
+    const body = `
+      Estimado(a) participante,
+  
+      Le informamos que tiene una cita agendada con los siguientes detalles:
+  
+      - 📝 Evento: ${nombre}
+      - 📅 Fecha: ${fecha}
+      - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
+      - 🧭 Modalidad: ${modalidadTexto}
+      - 🧩 Tipo de cita: ${tipoCitaTexto}
+  
+      Por favor, guarde esta información y preséntese puntualmente.  
+      Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
+  
+      Saludos cordiales,  
+      Vicerrectorado Académico  
+      UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
+    `.trim();
+  
+    const payload = { to: email, subject, body };
+  
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+  
+      if (!response.ok) throw new Error("Error al enviar el correo");
+  
+      alert("✅ Correo enviado correctamente.");
+      calendar.refetchEvents();
+    } catch (error) {
+      console.error("❌ Error al enviar correo:", error);
+      alert("Ocurrió un error al enviar el correo.");
+    }
+  }
+  
+
 
   async function actualizarEventoDesdeDragResize(evento) {
     const id = evento.extendedProps.id_cita;
@@ -226,7 +267,6 @@
       });
 
       if (!resp.ok) throw new Error("Error al actualizar evento con drag/resize");
-      console.log("✅ Evento actualizado exitosamente");
     } catch (error) {
       console.error("❌ Error al actualizar evento:", error);
       alert("No se pudo actualizar el evento");
@@ -311,48 +351,15 @@
       // 👇 Nueva lógica para preguntar si deseas enviar notificación
       const deseaNotificar = confirm("¿Deseas enviar una notificación por correo al solicitante?");
       if (deseaNotificar) {
-        const subject = `🗓️ Recordatorio: Cita agendada para ${titulo} el ${fecha} a las ${horaInicio}`;
-
-        const body = `
-        Estimado(a) participante,
-
-        Le informamos que tiene una cita agendada con los siguientes detalles:
-
-        - 📝 Evento: ${titulo}
-        - 📅 Fecha: ${fecha}
-        - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
-        - 🧭 Modalidad: ${modalidadTexto}
-        - 🧩 Tipo de cita: ${tipoCitaTexto}
-
-
-        Por favor, guarde esta información y preséntese puntualmente.  
-        Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
-
-        Saludos cordiales,  
-        Vicerrectorado Académico  
-        UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
-        `.trim();
-
-
-        const payload = {
-          to: email,
-          subject,
-          body
-        };
-
-        try {
-          const response = await fetch("http://127.0.0.1:8000/api/email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-
-          if (!response.ok) throw new Error("Error al enviar el correo");
-          alert("📧 Correo enviado correctamente.");
-        } catch (error) {
-          console.error("❌ Error al enviar correo:", error);
-          alert("Ocurrió un error al enviar el correo.");
-        }
+        await enviarCorreoConfirmacion({
+          nombre: titulo,
+          fecha,
+          horaInicio,
+          horaFin,
+          email,
+          modalidadTexto,
+          tipoCitaTexto
+        });
       }
 
     } catch (error) {
@@ -464,7 +471,6 @@
       calendar.unselect();
     }
   
-    const btnEnviarCorreo = document.getElementById('enviarCorreo');
     if (btnEnviarCorreo) {
       btnEnviarCorreo.onclick = async () => {
         const nombre = document.getElementById('tituloEvento').value.trim();
@@ -472,61 +478,23 @@
         const horaInicio = document.getElementById('horaInicioEvento').value;
         const horaFin = document.getElementById('horaFinEvento').value;
         const email = document.getElementById('emailEvento').value.trim();
-  
-        const modalidad = document.getElementById('modalidadEvento').value;
-        const modalidadTexto = document.getElementById('modalidadEvento')
-          .options[document.getElementById('modalidadEvento').selectedIndex].text;
-  
-        const tipoCita = document.getElementById('tipoCita').value;
-        const tipoCitaTexto = document.getElementById('tipoCita')
-          .options[document.getElementById('tipoCita').selectedIndex].text;
-  
-        if (!email || !nombre || !fecha || !horaInicio) {
-          return alert("Completa todos los campos para enviar el correo.");
-        }
-  
-        const subject = `🗓️ Recordatorio: Cita agendada para ${nombre} el ${fecha} a las ${horaInicio}`;
-        const body = `
-          Estimado(a) participante,
-  
-          Le informamos que tiene una cita agendada con los siguientes detalles:
-  
-          - 📝 Evento: ${nombre}
-          - 📅 Fecha: ${fecha}
-          - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
-          - 🧭 Modalidad: ${modalidadTexto}
-          - 🧩 Tipo de cita: ${tipoCitaTexto}
-  
-          Por favor, guarde esta información y preséntese puntualmente.  
-          Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
-  
-          Saludos cordiales,  
-          Vicerrectorado Académico  
-          UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
-          ..
-        `.trim();
-  
-        const payload = {
-          to: email,
-          subject,
-          body
-        };
-  
-        try {
-          const response = await fetch("http://127.0.0.1:8000/api/email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-  
-          if (!response.ok) throw new Error("Error al enviar el correo");
-          alert("✅ Correo enviado correctamente.");
-        } catch (error) {
-          console.error("❌ Error al enviar correo:", error);
-          alert("Ocurrió un error al enviar el correo.");
-        }
+    
+        // ✅ ¡Estos se evalúan al momento del clic!
+        const modalidadTexto = document.getElementById('modalidadEvento').selectedOptions[0].text;
+        const tipoCitaTexto = document.getElementById('tipoCita').selectedOptions[0].text;
+    
+        await enviarCorreoConfirmacion({
+          nombre,
+          fecha,
+          horaInicio,
+          horaFin,
+          email,
+          modalidadTexto,
+          tipoCitaTexto
+        });
       };
     }
+    
   }
   
 
@@ -537,7 +505,6 @@
 
   if (btnAnalizar) {
     btnAnalizar.addEventListener('click', () => {
-      console.log("🔍 Botón 'Analiza agenda' clickeado. Ejecutando análisis...");
       setTimeout(hacerAnalisisAgenda, 500); // delay para esperar a que se muestre el modal
     });
   }
@@ -546,9 +513,7 @@
     window.onload = () => {
       const analizaModal = document.getElementById('analizaModal');
       if (analizaModal) {
-        console.log("✅ Modal encontrado");
         analizaModal.addEventListener('shown.bs.modal', () => {
-          console.log("📊 Modal de análisis abierto. Ejecutando análisis...");
           hacerAnalisisAgenda();
         });
       } else {
@@ -588,7 +553,6 @@
         id_tipo_cita: evento.extendedProps?.id_tipo_cita || 1
       }));
 
-      console.log("🧪 Eventos para análisis:", eventos);
 
       try {
         const resp = await fetch('/analisis/analizarAgenda', {
@@ -602,7 +566,6 @@
         }
 
         const data = await resp.json();
-        console.log('Resultado del análisis:', data);
 
         const resultadoDiv = document.getElementById('analisisResultado');
         if (!resultadoDiv) return;
@@ -717,7 +680,6 @@
       }
 
       const data = await resp.json();
-      console.log('Sugerencia IA:', data);
 
       if (data.recomendacion?.nuevo_inicio && data.recomendacion?.nuevo_fin) {
         const inicioISO = data.recomendacion.nuevo_inicio;
@@ -778,8 +740,12 @@
   /*******Agregamos el manejador del botón #aplicarSugerenciaIA**********/
   const btnAplicarSugerenciaIA = document.getElementById('aplicarSugerenciaIA');
 
-  if (btnAplicarSugerenciaIA) {
-    btnAplicarSugerenciaIA.addEventListener('click', function () {
+if (btnAplicarSugerenciaIA) {
+  btnAplicarSugerenciaIA.addEventListener('click', async function () {
+    // 🔒 Bloquea el botón al iniciar
+    btnAplicarSugerenciaIA.disabled = true;
+
+    try {
       if (!window.sugerenciaIAActual) {
         alert('No hay sugerencia disponible para aplicar.');
         return;
@@ -797,7 +763,7 @@
       const [fecha, horaInicioFull] = nuevoInicio.split('T');
       const horaInicio = horaInicioFull.slice(0, 5);
 
-      const [_, horaFinFull] = nuevoFin.split('T');
+      const [, horaFinFull] = nuevoFin.split('T');
       const horaFin = horaFinFull.slice(0, 5);
 
       // Limpiamos el formulario del evento antes de llenarlo
@@ -813,17 +779,25 @@
       // Cambiar el título del modal de evento
       document.getElementById('eventoModalLabel').textContent = 'Nuevo Evento Sugerido por IA';
 
-      // Ocultar el botón de eliminar, ya que es un nuevo evento
+      // Ocultar el botón de eliminar
       document.getElementById('eliminarEvento').classList.add('d-none');
 
-      // Mostrar el modal de crear/editar evento
+      // Mostrar el modal
       const eventoModal = new bootstrap.Modal(document.getElementById('eventoModal'));
       eventoModal.show();
 
-      // Limpia la variable global si quieres evitar duplicaciones
+      // Limpiar sugerencia usada
       window.sugerenciaIAActual = null;
-    });
-  }
+    } catch (error) {
+      console.error('❌ Error al aplicar sugerencia IA:', error);
+      alert('Ocurrió un error al aplicar la sugerencia.');
+    } finally {
+      // 🔓 Reactiva el botón pase lo que pase
+      btnAplicarSugerenciaIA.disabled = false;
+    }
+  });
+}
+
 
   async function moverEventoRecomendado(tituloEvento, nuevoInicioISO, nuevoFinISO) {
     const eventos = calendar.getEvents();
@@ -890,7 +864,6 @@
       });
 
       if (!resp.ok) throw new Error("Error al actualizar evento");
-      console.log("✅ Evento actualizado en la base de datos");
     } catch (error) {
       console.error("❌ Error al actualizar en backend:", error);
       alert("No se pudo actualizar el evento en la base de datos.");
@@ -899,24 +872,17 @@
 
 
   function abrirModalEditar(evento) {
-    console.log("🧪 Evento seleccionado:", evento.extendedProps);
-
+  
     eventoSeleccionado = evento;
+  
     const startDate = evento.start;
     const endDate = evento.end;
-
+  
     const fecha = startDate.toISOString().split("T")[0];
     const horaInicio = startDate.toTimeString().slice(0, 5);
     const horaFin = endDate ? endDate.toTimeString().slice(0, 5) : '';
-    const btnEnviarCorreo = document.getElementById('enviarCorreo');
-    const modalidad = document.getElementById('modalidadEvento').value; // ✅ ID de modalidad
-    const modalidadTexto = document.getElementById('modalidadEvento')
-      .options[document.getElementById('modalidadEvento').selectedIndex].text; // ✅ Texto visible
-    
-    const tipoCitaTexto = document.getElementById('tipoCita')
-      .options[document.getElementById('tipoCita').selectedIndex].text;
-    
-
+  
+    // Llenar campos del formulario
     document.getElementById('eventoModalLabel').textContent = 'Editar Evento';
     document.getElementById('tituloEvento').value = evento.extendedProps.nombre || evento.title;
     document.getElementById('fechaEvento').value = fecha;
@@ -925,18 +891,21 @@
     document.getElementById('descripcionEvento').value = evento.extendedProps.description || '';
     document.getElementById('emailEvento').value = evento.extendedProps.email || '';
     document.getElementById('estadoEvento').value = evento.extendedProps.estado || 'Pendiente';
-
-    // ✅ Agregado: establecer la modalidad en el select
-    document.getElementById('modalidadEvento').value = evento.extendedProps.id_modalidad || '1';
-    // ✅ Agregado: establecer la tipo de cita en el select
-    document.getElementById('tipoCita').value = evento.extendedProps.id_tipo_cita || '1';
-
-
+  
+    // Establecer valores de los select
+    document.getElementById('modalidadEvento').value = String(evento.extendedProps.id_modalidad || '1');
+    document.getElementById('tipoCita').value = String(evento.extendedProps.id_tipo_cita || '1');
+    
+  
+    // Mostrar botón eliminar
     document.getElementById('eliminarEvento').classList.remove('d-none');
-
+  
+    // Mostrar modal
     const modal = new bootstrap.Modal(document.getElementById('eventoModal'));
     modal.show();
-
+  
+    // Manejador del botón para enviar correo
+    const btnEnviarCorreo = document.getElementById('enviarCorreo');
     if (btnEnviarCorreo) {
       btnEnviarCorreo.onclick = async () => {
         const nombre = document.getElementById('tituloEvento').value.trim();
@@ -944,54 +913,28 @@
         const horaInicio = document.getElementById('horaInicioEvento').value;
         const horaFin = document.getElementById('horaFinEvento').value;
         const email = document.getElementById('emailEvento').value.trim();
-
+  
+        // ✅ Captura dinámica al momento del clic
+        const modalidadTexto = document.getElementById('modalidadEvento').selectedOptions[0].text;
+        const tipoCitaTexto = document.getElementById('tipoCita').selectedOptions[0].text;
+  
         if (!email || !nombre || !fecha || !horaInicio) {
           return alert("Completa todos los campos para enviar el correo.");
         }
-
-        const subject = `🗓️ Recordatorio: Cita agendada para ${nombre} el ${fecha} a las ${horaInicio}`;
-        const body = `
-          Estimado(a) participante,
-
-        Le informamos que tiene una cita agendada con los siguientes detalles:
-
-        - 📝 Evento: ${nombre}
-        - 📅 Fecha: ${fecha}
-        - ⏰ Hora: Desde las ${horaInicio} hasta las ${horaFin || "hora no especificada"}
-        - 🧭 Modalidad: ${modalidadTexto}
-        - 🧩 Tipo de cita: ${tipoCitaTexto}
-
-
-        Por favor, guarde esta información y preséntese puntualmente.  
-        Si tiene alguna duda o necesita reprogramar la cita, contáctenos con anticipación.
-
-        Saludos cordiales,  
-        Vicerrectorado Académico  
-        UNIVERSIDAD BOLIVARIANA DEL ECUADOR – UBE
-        `.trim();
-
-        const payload = {
-          to: email,
-          subject,
-          body
-        };
-
-        try {
-          const response = await fetch("http://127.0.0.1:8000/api/email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-
-          if (!response.ok) throw new Error("Error al enviar el correo");
-          alert("✅ Correo enviado correctamente.");
-        } catch (error) {
-          console.error("❌ Error al enviar correo:", error);
-          alert("Ocurrió un error al enviar el correo.");
-        }
+  
+        await enviarCorreoConfirmacion({
+          nombre,
+          fecha,
+          horaInicio,
+          horaFin,
+          email,
+          modalidadTexto,
+          tipoCitaTexto
+        });
       };
     }
   }
+  
 
   function initInicioUI() {
     const btnAnalizar = document.querySelector('[data-bs-target="#analizaModal"]');

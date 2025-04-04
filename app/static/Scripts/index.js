@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
       urlScript = '/static/Scripts/reportes.js';
       callback = () => {
         setTimeout(() => {
-          console.log('🔁 Ejecutando callback de reportes');
           if (typeof initReportesUI === 'function') {
             initReportesUI();
           } else {
@@ -47,20 +46,28 @@ document.addEventListener('DOMContentLoaded', () => {
       break;
 
 
-    case '/parametros':
-      modulo = 'parametros';
-      urlHtml = '/fragment/parametros';
-      urlScript = '/static/Scripts/parametros.js';
-      callback = null;
-      break;
+      case '/parametros':
+        modulo = 'parametros';
+        urlHtml = '/fragment/parametros';
+        urlScript = '/static/Scripts/parametros.js';
+        callback = () => {
+          setTimeout(() => {
+            if (typeof initParametrosUI === 'function') {
+              initParametrosUI();
+            } else {
+              console.warn("⚠️ initParametrosUI no está definido");
+            }
+          }, 100); // delay para asegurar que el script ya se cargó
+        };
+        break;
+      
   }
 
   const link = document.querySelector(`.nav-link[data-modulo="${modulo}"]`);
   if (link) setActiveMenuItem(link);
   
   // ✅ Evitar recargar el mismo módulo si ya está activo
-  if (modulo === moduloActual) {
-    console.log(`⏭️ El módulo '${modulo}' ya está cargado.`);
+  if (modulo === moduloActual && modulo !== 'parametros') {
     return;
   }
   moduloActual = modulo;
@@ -87,7 +94,6 @@ async function cargarModulo(urlHtml, urlScript, callbackFinal, nuevaRuta = null)
       const scripts = document.querySelectorAll('script[data-dynamic="true"]');
       scripts.forEach(script => {
         if (script.src.includes(urlScript)) {
-          console.log(`🗑️ Eliminando script existente: ${script.src}`);
           script.remove();
         }
       });
@@ -97,7 +103,6 @@ async function cargarModulo(urlHtml, urlScript, callbackFinal, nuevaRuta = null)
       newScript.src = `${urlScript}?v=${Date.now()}`; // 🔄 evita caché y fuerza recarga
       newScript.dataset.dynamic = 'true';
       newScript.onload = () => {
-        console.log(`✅ Script cargado: ${newScript.src}`);
         if (typeof callbackFinal === 'function') callbackFinal();
       };
       
@@ -168,7 +173,6 @@ window.addEventListener('popstate', (e) => {
       urlScript = '/static/Scripts/reportes.js';
       callback = () => {
         setTimeout(() => {
-          console.log('🔁 Ejecutando callback de reportes (popstate)');
           if (typeof initReportesUI === 'function') {
             initReportesUI();
           } else {
@@ -178,12 +182,21 @@ window.addEventListener('popstate', (e) => {
       };
       break;
 
-    case '/parametros':
-      modulo = 'parametros';
-      urlHtml = '/fragment/parametros';
-      urlScript = '/static/Scripts/parametros.js';
-      callback = null;
-      break;
+      case '/parametros':
+        modulo = 'parametros';
+        urlHtml = '/fragment/parametros';
+        urlScript = '/static/Scripts/parametros.js';
+        callback = () => {
+          setTimeout(() => {
+            if (typeof initParametrosUI === 'function') {
+              initParametrosUI();
+            } else {
+              console.warn("⚠️ initParametrosUI no está definido");
+            }
+          }, 200); // delay para asegurar que el script ya se cargó
+        };
+        break;
+      
   }
 
   const link = document.querySelector(`.nav-link[data-modulo="${modulo}"]`);
