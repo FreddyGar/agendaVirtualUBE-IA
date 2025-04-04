@@ -13,13 +13,11 @@ function iniciarCargaTabla() {
     return;
   }
 
-  console.log("✅ Tabla encontrada. Ejecutando cargarEventos...");
   cargarEventos();
 }
 
 async function obtenerEventosDesdeAPI() {
   try {
-    console.log("🔄 Obteniendo eventos desde la API...");
     const response = await fetch("http://127.0.0.1:8000/api/citas", {
       method: "GET",
       credentials: "include"
@@ -46,7 +44,6 @@ async function obtenerEventosDesdeAPI() {
       classNames: cita.estado === 'Pendiente' ? 'evento-pendiente' : '',
     }));
 
-    console.log("🟢 Eventos formateados para FullCalendar:", eventosOriginales);
     return eventosOriginales;
   } catch (error) {
     console.error("❌ Error al obtener eventos desde la API:", error);
@@ -55,7 +52,6 @@ async function obtenerEventosDesdeAPI() {
 }
 let uiInicializada = false;
 async function cargarEventos() {
-  console.log("🔄 Ejecutando cargarEventos...");
   try {
     const eventos = await obtenerEventosDesdeAPI();
 
@@ -67,7 +63,6 @@ async function cargarEventos() {
 
     eventosOriginales = eventos.sort((a, b) => new Date(a.start) - new Date(b.start));
     aplicarFiltros();
-    console.log("✅ Eventos cargados y mostrados");
 
     // ✅ Solo inicializar UI una vez
     if (!uiInicializada) {
@@ -115,7 +110,6 @@ function aplicarFiltros() {
       actualizarTablaEventos(eventosFiltrados);
     }
 
-    console.log("🔎 Eventos filtrados:", eventosFiltrados);
 
   }
   
@@ -185,11 +179,9 @@ function actualizarTablaEventos(eventos) {
     tablaBody.appendChild(fila);
   });
 
-  console.log("✅ Tabla de eventos actualizada.");
 }
 
 function initReportesUI() {
-  console.log("🚀 Iniciando UI de reportes");
 
   const filtroTexto = document.getElementById('filtroEventos');
   const btnBuscar = document.getElementById('btnBuscar');

@@ -1,38 +1,92 @@
-console.log("✅ Script parametros.js cargado");
-cargarDatosUsuario(); // En caso de que el formulario ya esté cargado al inicio
+(function () {
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("📦 DOM completamente cargado");
-  esperarFormularioYAplicar(); // En refresh
-});
+function inicializarFormularios() {
+  const formularioUsuario = document.getElementById("usuarioForm");
+  const formCambio = document.getElementById("cambioContrasenaForm");
 
-// 👁️ Observa si se carga dinámicamente después
-// const observer = new MutationObserver(() => {
-//   const formulario = document.getElementById("usuarioForm");
-//   if (formulario && !formulario.dataset.listener) {
-//     console.log("👀 Formulario detectado dinámicamente");
-//     cargarDatosUsuario();
-//     inicializarFormulario(formulario);
-//   }
-// });
-// observer.observe(document.body, { childList: true, subtree: true });
+  if (formularioUsuario && formularioUsuario.dataset.listener !== "true") {
+    formularioUsuario.dataset.listener = "true";
+    inicializarFormulario(formularioUsuario);
+  }
 
-// ⏳ Espera que exista el formulario tras un refresh
-function esperarFormularioYAplicar() {
-  const intervalo = setInterval(() => {
-    const formulario = document.getElementById("usuarioForm");
-    if (formulario) {
-      console.log("📝 Formulario detectado tras refresh");
-      clearInterval(intervalo);
-      cargarDatosUsuario();
-      inicializarFormulario(formulario);
+  if (formCambio) {
+    if (formCambio.dataset.listener !== "true") {
+      formCambio.dataset.listener = "true";
+      inicializarCambioContrasena(formCambio);
     }
-  }, 300); // cada 300ms revisa hasta que aparezca
+  } else {
+    console.warn("⚠️ El formulario de cambio de contraseña no fue encontrado.");
+  }
 }
 
+// 🔐 Cambio de contraseña
+function inicializarCambioContrasena(formCambio) {
+  formCambio.addEventListener("submit", async (e) => {
+    e.preventDefault(); // 👈 Esto evita el refresh
+
+    const btn = formCambio.querySelector("button[type='submit']");
+    if (btn) btn.disabled = true;
+
+    const nueva = document.getElementById("nuevaContrasena").value.trim();
+    const confirmar = document.getElementById("confirmarContrasena").value.trim();
+
+    if (!nueva || !confirmar) {
+      alert("⚠️ Por favor, completa todos los campos.");
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    if (nueva.length < 8) {
+      alert("🔐 La contraseña debe tener al menos 8 caracteres.");
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    if (nueva !== confirmar) {
+      alert("❌ Las contraseñas no coinciden.");
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    const usuarioLocal = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuarioLocal || !usuarioLocal.id_usuario) {
+      alert("⚠️ No se encontró el ID del usuario.");
+      if (btn) btn.disabled = false;
+      return;
+    }
+
+    const idUsuario = usuarioLocal.id_usuario;
+    const datos = { contrasena: nueva };
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/usuarios/${idUsuario}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(datos)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Error en la solicitud:", errorText);
+        alert("❌ No se pudo cambiar la contraseña.");
+        return;
+      }
+
+      alert("✅ Contraseña actualizada correctamente.");
+      formCambio.reset();
+    } catch (error) {
+      console.error("❌ Error al cambiar contraseña:", error);
+      alert("Ocurrió un error al cambiar la contraseña.");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
+// 📥 Cargar datos del usuario desde la API
 async function cargarDatosUsuario() {
   try {
-    console.log("🔍 Cargando usuario desde localStorage...");
     const usuarioLocal = JSON.parse(localStorage.getItem("usuario"));
 
     if (!usuarioLocal || !usuarioLocal.id_usuario) {
@@ -40,14 +94,10 @@ async function cargarDatosUsuario() {
     }
 
     const idUsuario = usuarioLocal.id_usuario;
-    console.log("📤 Enviando solicitud a /api/usuarios/" + idUsuario);
-
     const response = await fetch(`http://127.0.0.1:8000/api/usuarios/${idUsuario}`, {
       method: "GET",
       credentials: "include"
     });
-
-    console.log("📥 Respuesta cruda:", response);
 
     if (!response.ok) {
       const texto = await response.text();
@@ -56,16 +106,19 @@ async function cargarDatosUsuario() {
     }
 
     const usuario = await response.json();
-    console.log("🟢 Datos obtenidos:", usuario);
 
-    if (document.getElementById("usuarioForm")) {
+    const form = document.getElementById("usuarioForm");
+    if (form) {
       document.getElementById("nombre").value = usuario.nombre || "";
       document.getElementById("apellido").value = usuario.apellido || "";
       document.getElementById("email").value = usuario.email || "";
       document.getElementById("telefono").value = usuario.telefono || "";
       document.getElementById("estado").value = usuario.estado || "";
-      document.getElementById("ultimaSesion").value = usuario.ultima_sesion || "";
-      document.getElementById("horarioLaboral").value = usuario.horario || "";
+
+      const inputHorario = document.getElementById("horarioLaboral");
+      if (inputHorario) {
+        inputHorario.value = usuario.horario || "";
+      }
     }
 
   } catch (error) {
@@ -73,12 +126,11 @@ async function cargarDatosUsuario() {
   }
 }
 
+// 📝 Lógica de actualización de datos personales
 function inicializarFormulario(formularioUsuario) {
-  if (formularioUsuario.dataset.listener === "true") return;
-  formularioUsuario.dataset.listener = "true";
-
   formularioUsuario.addEventListener("submit", async (e) => {
     e.preventDefault();
+    cargarDatosUsuario(); // Cargar datos antes de enviar el formulario
 
     const usuarioLocal = JSON.parse(localStorage.getItem("usuario"));
     if (!usuarioLocal || !usuarioLocal.id_usuario) {
@@ -111,9 +163,21 @@ function inicializarFormulario(formularioUsuario) {
       }
 
       alert("✅ Datos actualizados correctamente.");
+      cargarDatosUsuario(); // Recargar datos después de la actualización
     } catch (error) {
-      console.error("❌ Error al actualizar usuario:", error);
       alert("Ocurrió un error al guardar los datos.");
     }
   });
 }
+
+// 👇 Esta es la función que se debe invocar desde el index.js
+window.initParametrosUI = function () {
+  console.log("🚀 Iniciando UI de parámetros...");
+
+  setTimeout(() => {
+    inicializarFormularios();
+    cargarDatosUsuario();
+  }, 100); // ✅ espera breve para que el DOM del fragmento ya esté renderizado
+};
+
+})();

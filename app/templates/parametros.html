@@ -24,11 +24,6 @@
     <!-- Primer bloque: Foto + Datos -->
     <div class="parametros-container fila-superior">
 
-      <!-- Foto de Perfil -->
-      <div class="foto-perfil-section">
-        <img id="fotoPerfil" src="{{ url_for('static', filename='img/user.jpg') }}" alt="Foto de Perfil">
-        <input type="file" id="fileInput" accept="image/*">
-      </div>
 
       <!-- Datos Personales -->
       <form id="usuarioForm" class="info-form-section">
@@ -76,45 +71,7 @@
     <!-- Segundo bloque: Horarios y Cambio de Contraseña -->
     <div class="fila-inferior">
 
-      <!-- Tercer bloque: Horarios -->
-      <div class="parametros-container bloque-horarios">
-
-        <h2 class="parametros-title"><i class="fa-solid fa-clock"></i> Mis Horarios</h2>
-        <p class="parametros-description">Gestiona tus horarios laborales y tus horas no disponibles.</p>
-
-        <!-- Horarios Laborales -->
-        <div class="info-form-section horario-laboral">
-          <h3><i class="fa-solid fa-briefcase"></i> Horario Laboral</h3>
-          <div class="form-group">
-            <label for="horarioLaboral">Horario:</label>
-            <input type="text" id="horarioLaboral" name="horarioLaboral" readonly>
-          </div>
-        </div>
-
-        <!-- Horarios No Disponibles -->
-        <div class="info-form-section horarios-no-disponibles">
-          <h3><i class="fa-solid fa-ban"></i> Horarios No Disponibles</h3>
-        <!-- Inputs para agregar nuevos horarios -->
-        <div class="form-group-inline">
-          <label for="nuevoDesde">Desde:</label>
-          <input type="time" id="nuevoDesde">
-        </div>
-
-        <div class="form-group-inline">
-          <label for="nuevoHasta">Hasta:</label>
-          <input type="time" id="nuevoHasta">
-        </div>
-
-          <!-- Botón para agregar horarios -->
-          <button type="button" onclick="agregarHorario()" class="btn-agregar">
-            <i class="fa-solid fa-plus"></i> Agregar Horario
-          </button>
-
-          <!-- Lista de horarios no disponibles -->
-          <ul id="listaHorarios" class="lista-horarios"></ul>
-        </div>
-
-      </div>
+      
 
       <!-- Segundo bloque: Cambio de Contraseña -->
       <div class="parametros-container bloque-contrasena">
@@ -122,10 +79,6 @@
 
         <form id="cambioContrasenaForm" class="info-form-section">
 
-          <div class="form-group">
-            <label for="contrasenaActual">Contraseña Actual:</label>
-            <input type="password" id="contrasenaActual" name="contrasenaActual" required>
-          </div>
 
           <div class="form-group">
             <label for="nuevaContrasena">Nueva Contraseña:</label>
@@ -147,7 +100,7 @@
 
   </div>
 
-  <script src="{{ url_for('static', filename='Scripts/parametros.js') }}"></script>
+  <script src="{{ url_for('static', filename='Scripts/parametros.js') }}" defer></script>
 
 </body>
 </html>
