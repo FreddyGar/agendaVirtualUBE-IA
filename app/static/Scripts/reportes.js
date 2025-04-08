@@ -61,7 +61,7 @@ async function cargarEventos() {
       return;
     }
 
-    eventosOriginales = eventos.sort((a, b) => new Date(a.start) - new Date(b.start));
+    eventosOriginales = eventos.sort((a, b) => new Date(b.start) - new Date(a.start));
     aplicarFiltros();
 
     // ✅ Solo inicializar UI una vez

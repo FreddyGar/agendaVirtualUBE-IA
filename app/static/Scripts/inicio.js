@@ -116,10 +116,10 @@
 
       // 🆕 Agregado: seleccionar rango en vista semanal/diaria
       select: function (info) {
-        if (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay') {
-          abrirModalCrear(info.startStr, info.endStr);
-          calendar.unselect(); // limpia la selección
-        }
+        console.log("Se select de horario");
+        abrirModalCrear(info.startStr, info.endStr);
+        calendar.unselect(); // limpia la selección
+        
       },
 
       dateClick: function (info) {
@@ -465,7 +465,8 @@
     modalElement.addEventListener('hidden.bs.modal', limpiarAlCerrar);
   
     modal.show();
-  
+    // ✅ Agrega esta línea justo aquí:
+    const btnEnviarCorreo = document.getElementById('enviarCorreo');
     // ✅ Limpia también la selección justo al mostrar (por si se usó select en week/day)
     if (calendar) {
       calendar.unselect();

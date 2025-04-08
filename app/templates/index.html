@@ -59,13 +59,16 @@
           </a>
         </li>
 
-        <li class="nav-item">
-          <a href="/parametros" class="nav-link" data-modulo="parametros"
-            onclick="event.preventDefault(); setActiveMenuItem(this); cargarModulo('/fragment/parametros', '/static/Scripts/parametros.js', null, '/parametros');">
-            <i class="bi bi-gear-fill"></i>
-            <span class="link-text">Parámetros</span>
-          </a>
-        </li>
+        <a href="/parametros" class="nav-link" data-modulo="parametros"
+          onclick="event.preventDefault(); 
+                  setActiveMenuItem(this); 
+                  cargarModulo('/fragment/parametros', '/static/Scripts/parametros.js', () => { 
+                    setTimeout(() => location.reload(), 300); 
+                  }, '/parametros');">
+          <i class="bi bi-gear-fill"></i>
+          <span class="link-text">Parámetros</span>
+        </a>
+
 
         <li class="nav-item mt-auto logout">
           <a href="#" class="nav-link text-danger" onclick="logout();">

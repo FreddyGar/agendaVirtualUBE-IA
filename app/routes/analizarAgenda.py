@@ -52,14 +52,15 @@ def analizar_agenda():
         "solapados": solapados
     }), 200
 
-
 def sugerir_otro_horario(evento_conflictivo, eventos, dias_a_buscar=7):
     """
     Busca un hueco en el mismo día o en los siguientes días, hasta encontrar uno.
+    No sugiere horas pasadas si el día es hoy.
     """
 
     DURACION_EVENTO = evento_conflictivo['end_dt'] - evento_conflictivo['start_dt']
     DIA_INICIAL = evento_conflictivo['start_dt'].date()
+    ahora = datetime.now(ZONA_UTC_MINUS_5)  # 🕒 Hora actual en UTC-5
 
     for dias_extra in range(dias_a_buscar):
         DIA = DIA_INICIAL + timedelta(days=dias_extra)
@@ -88,9 +89,12 @@ def sugerir_otro_horario(evento_conflictivo, eventos, dias_a_buscar=7):
         # Buscar el primer hueco disponible en el día
         posible_inicio = inicio_laboral
 
+        # 🕒 Si es hoy, no sugerir horas pasadas
+        if DIA == ahora.date():
+            posible_inicio = max(posible_inicio, ahora)
+
         for inicio, fin in bloques_ocupados:
             if posible_inicio + DURACION_EVENTO <= inicio:
-                # Verificar que esté dentro del horario laboral
                 if posible_inicio >= inicio_laboral and (posible_inicio + DURACION_EVENTO) <= fin_laboral:
                     nuevo_inicio = posible_inicio
                     nuevo_fin = nuevo_inicio + DURACION_EVENTO
@@ -110,18 +114,19 @@ def sugerir_otro_horario(evento_conflictivo, eventos, dias_a_buscar=7):
 
         # Verificar espacio al final de la jornada
         if posible_inicio + DURACION_EVENTO <= fin_laboral:
-            nuevo_inicio = posible_inicio
-            nuevo_fin = nuevo_inicio + DURACION_EVENTO
+            if DIA != ahora.date() or posible_inicio >= ahora:
+                nuevo_inicio = posible_inicio
+                nuevo_fin = nuevo_inicio + DURACION_EVENTO
 
-            return {
-                "evento_a_mover": evento_conflictivo['title'],
-                "mensaje": (
-                    f"Se sugiere mover '{evento_conflictivo['title']}' "
-                    f"a las {nuevo_inicio.time().strftime('%H:%M')} del {DIA.isoformat()}"
-                ),
-                "nuevo_inicio": nuevo_inicio.isoformat(),
-                "nuevo_fin": nuevo_fin.isoformat()
-            }
+                return {
+                    "evento_a_mover": evento_conflictivo['title'],
+                    "mensaje": (
+                        f"Se sugiere mover '{evento_conflictivo['title']}' "
+                        f"a las {nuevo_inicio.time().strftime('%H:%M')} del {DIA.isoformat()}"
+                    ),
+                    "nuevo_inicio": nuevo_inicio.isoformat(),
+                    "nuevo_fin": nuevo_fin.isoformat()
+                }
 
     # Si no hay hueco en los siguientes días
     return {
